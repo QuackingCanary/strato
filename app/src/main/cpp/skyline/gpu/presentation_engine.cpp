@@ -367,7 +367,7 @@ namespace skyline::gpu {
 
             if (window->common.magic != AndroidNativeWindowMagic)
                 throw exception("ANativeWindow* has unexpected magic: {} instead of {}", span(&window->common.magic, 1).as_string(true), span<const u8>(reinterpret_cast<const u8 *>(&AndroidNativeWindowMagic), sizeof(u32)).as_string(true));
-            if (window->common.version != sizeof(ANativeWindow))
+            if (window->common.version < sizeof(ANativeWindow))
                 throw exception("ANativeWindow* has unexpected version: {} instead of {}", window->common.version, sizeof(ANativeWindow));
 
             int result;
