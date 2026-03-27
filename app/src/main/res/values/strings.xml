@@ -161,10 +161,22 @@
     <string name="validation_layer">Enable Validation Layer</string>
     <string name="validation_layer_enabled">The Vulkan validation layer is enabled, major slowdowns are to be expected</string>
     <string name="validation_layer_disabled">The Vulkan validation layer is disabled</string>
+    <!-- Driver Fetcher -->
+    <string name="get_drivers">Get Drivers</string>
+    <string name="driver_fetcher_title">Get GPU Drivers</string>
+    <string name="driver_fetcher_subtitle">Browse and download GPU driver packages from community sources</string>
+    <string name="driver_changelog">Changelog</string>
+    <string name="your_gpu">Your GPU</string>
+    <string name="driver_load_error">Failed to load: %1$s</string>
+    <string name="see_more">See more</string>
+    <string name="see_less">See less</string>
+    <string name="installed">Installed</string>
     <!-- Gpu Driver Activity -->
     <string name="gpu_driver">GPU Driver</string>
     <string name="add_gpu_driver">Add a GPU driver</string>
     <string name="delete_gpu_driver">Delete this GPU driver</string>
+    <string name="delete_gpu_driver_confirm">Delete \"%1$s\"?</string>
+    <string name="delete">Delete</string>
     <string name="system_driver">System Driver</string>
     <string name="system_driver_desc">The GPU driver provided by your system</string>
     <string name="install">Install</string>

@@ -86,29 +86,10 @@ class GpuDriverActivity : AppCompatActivity() {
         GpuDriverHelper.getInstalledDrivers(this).onEachIndexed { index, (file, metadata) ->
             items.add(GpuDriverViewItem(metadata).apply {
                 // Enable the delete button when configuring global settings only
-                onDelete = if (emulationSettings.isGlobal) { position, wasChecked ->
-                    // If the driver was selected, select the system driver as the active one
+                onDelete = if (emulationSettings.isGlobal) { _, wasChecked ->
                     if (wasChecked)
                         emulationSettings.gpuDriver = EmulationSettings.SYSTEM_GPU_DRIVER
-
-                    Snackbar.make(binding.root, "${metadata.label} deleted", Snackbar.LENGTH_LONG).setAction(R.string.undo) {
-                        this@GpuDriverActivity.adapter.run {
-                            addItemAt(position, this@apply)
-                            // If the item was selected before removal, set it back as the active one when undoing
-                            if (wasChecked) {
-                                // Only notify previous to avoid notifying items before indexes have updated, the newly inserted item will be updated on bind
-                                selectAndNotifyPrevious(position)
-                                emulationSettings.gpuDriver = metadata.label
-                            }
-                        }
-                    }.addCallback(object : Snackbar.Callback() {
-                        override fun onDismissed(transientBottomBar : Snackbar?, event : Int) {
-                            // Only delete the driver directory if the user didn't undo the deletion
-                            if (event != DISMISS_EVENT_ACTION) {
-                                file.deleteRecursively()
-                            }
-                        }
-                    }).show()
+                    file.deleteRecursively()
                 } else null
 
                 onClick = {
@@ -131,6 +112,7 @@ class GpuDriverActivity : AppCompatActivity() {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         WindowInsetsHelper.applyToActivity(binding.root, binding.driverList)
         WindowInsetsHelper.addMargin(binding.addDriverButton, bottom = true)
+        WindowInsetsHelper.addMargin(binding.getDriversButton, bottom = true)
 
         setSupportActionBar(binding.titlebar.toolbar)
         supportActionBar?.apply {
@@ -181,6 +163,10 @@ class GpuDriverActivity : AppCompatActivity() {
 
         binding.driverList.addItemDecoration(SpacingItemDecoration(resources.getDimensionPixelSize(R.dimen.grid_padding)))
 
+        binding.getDriversButton.setOnClickListener {
+            startActivity(Intent(this, DriverFetcherActivity::class.java))
+        }
+
         binding.addDriverButton.setOnClickListener {
             val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
                 addFlags(FLAG_GRANT_READ_URI_PERMISSION)
@@ -189,6 +175,11 @@ class GpuDriverActivity : AppCompatActivity() {
             installCallback.launch(intent)
         }
 
+        populateAdapter()
+    }
+
+    override fun onResume() {
+        super.onResume()
         populateAdapter()
     }
 

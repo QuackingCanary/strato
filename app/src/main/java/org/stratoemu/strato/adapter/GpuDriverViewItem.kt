@@ -8,6 +8,8 @@ package org.stratoemu.strato.adapter
 import android.annotation.SuppressLint
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.stratoemu.strato.R
 import org.stratoemu.strato.data.GpuDriverMetadata
 import org.stratoemu.strato.databinding.GpuDriverItemBinding
 
@@ -55,10 +57,15 @@ open class GpuDriverViewItem(
                 if (pos == RecyclerView.NO_POSITION)
                     return@setOnClickListener
 
-                val wasChecked = pos == selectableAdapter?.selectedPosition
-                selectableAdapter?.removeItemAt(pos)
-
-                onDelete.invoke(pos, wasChecked)
+                MaterialAlertDialogBuilder(binding.root.context)
+                    .setMessage(binding.root.context.getString(R.string.delete_gpu_driver_confirm, driverMetadata.label))
+                    .setNegativeButton(R.string.cancel, null)
+                    .setPositiveButton(R.string.delete) { _, _ ->
+                        val wasChecked = pos == selectableAdapter?.selectedPosition
+                        selectableAdapter?.removeItemAt(pos)
+                        onDelete.invoke(pos, wasChecked)
+                    }
+                    .show()
             }
         } ?: run {
             binding.deleteButton.visibility = ViewGroup.GONE

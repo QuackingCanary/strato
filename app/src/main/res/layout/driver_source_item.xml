@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    style="@style/Widget.Material3.CardView.Elevated"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    app:cardCornerRadius="@dimen/cornerRadiusLarge">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <!-- Clickable header row -->
+        <LinearLayout
+            android:id="@+id/header_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="10dp">
+
+            <!-- Colored accent bar -->
+            <View
+                android:layout_width="4dp"
+                android:layout_height="32dp"
+                android:layout_marginEnd="14dp"
+                android:background="?attr/colorPrimary" />
+
+            <!-- Name + subtitle column -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- Name row with inline loading and version chip -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/driver_name"
+                        style="?attr/textAppearanceTitleMedium"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Mesa Turnip" />
+
+                    <com.google.android.material.progressindicator.CircularProgressIndicator
+                        android:id="@+id/header_loading"
+                        android:layout_width="16dp"
+                        android:layout_height="16dp"
+                        android:layout_marginStart="8dp"
+                        android:visibility="gone"
+                        app:indicatorSize="16dp"
+                        app:trackThickness="2dp" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/version_chip"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="8dp"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:textSize="10sp"
+                        android:visibility="gone"
+                        app:chipMinHeight="24dp"
+                        tools:text="v23.3.0"
+                        tools:visibility="visible" />
+
+                    <com.google.android.material.chip.Chip
+                        android:id="@+id/installed_indicator"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="6dp"
+                        android:clickable="false"
+                        android:focusable="false"
+                        android:text="@string/installed"
+                        android:textSize="10sp"
+                        android:visibility="gone"
+                        app:chipBackgroundColor="?attr/colorPrimaryContainer"
+                        app:chipIcon="@drawable/ic_check"
+                        app:chipIconSize="12dp"
+                        app:chipIconTint="?attr/colorOnPrimaryContainer"
+                        app:chipMinHeight="20dp"
+                        tools:visibility="visible" />
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/driver_subtitle"
+                    style="?attr/textAppearanceBodySmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="2dp"
+                    android:textColor="?android:attr/textColorSecondary"
+                    tools:text="Open-source Vulkan for Adreno" />
+            </LinearLayout>
+
+            <!-- Expand / collapse arrow -->
+            <ImageView
+                android:id="@+id/expand_button"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="8dp"
+                android:clickable="false"
+                android:contentDescription="@null"
+                android:focusable="false"
+                app:srcCompat="@drawable/ic_keyboard_arrow_down"
+                app:tint="?android:attr/textColorSecondary" />
+        </LinearLayout>
+
+        <!-- Expandable content -->
+        <LinearLayout
+            android:id="@+id/expandable_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible">
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="?attr/colorOutlineVariant" />
+
+            <!-- Skeleton loading placeholders -->
+            <LinearLayout
+                android:id="@+id/releases_skeleton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="10dp"
+                android:paddingBottom="8dp"
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="90dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/bg_skeleton_placeholder"
+                    android:backgroundTint="?attr/colorOutlineVariant" />
+
+                <View
+                    android:layout_width="110dp"
+                    android:layout_height="20dp"
+                    android:layout_marginBottom="10dp"
+                    android:background="@drawable/bg_skeleton_placeholder"
+                    android:backgroundTint="?attr/colorOutlineVariant" />
+
+                <View
+                    android:layout_width="70dp"
+                    android:layout_height="20dp"
+                    android:background="@drawable/bg_skeleton_placeholder"
+                    android:backgroundTint="?attr/colorOutlineVariant" />
+
+            </LinearLayout>
+
+            <!-- Error text -->
+            <TextView
+                android:id="@+id/error_text"
+                style="?attr/textAppearanceBodyMedium"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginVertical="14dp"
+                android:drawablePadding="8dp"
+                android:gravity="center"
+                android:textColor="?attr/colorError"
+                android:visibility="gone"
+                tools:text="Failed to load: HTTP 404"
+                tools:visibility="visible" />
+
+            <!-- Releases list (dynamic) -->
+            <LinearLayout
+                android:id="@+id/releases_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+        </LinearLayout>
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>
