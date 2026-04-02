@@ -23,10 +23,12 @@ import com.google.android.material.snackbar.Snackbar
 import org.stratoemu.strato.data.AppItem
 import org.stratoemu.strato.data.AppItemTag
 import org.stratoemu.strato.databinding.AppDialogBinding
+import org.stratoemu.strato.getPublicFilesDir
 import org.stratoemu.strato.loader.LoaderResult
 import org.stratoemu.strato.settings.SettingsActivity
 import org.stratoemu.strato.utils.SaveManagementUtils
 import org.stratoemu.strato.utils.serializable
+import java.io.File
 
 /**
  * This dialog is used to show extra game metadata and provide extra options such as pinning the game to the home screen
@@ -149,6 +151,31 @@ class AppDialog : BottomSheetDialogFragment() {
             clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Title ID", item.titleId))
             Snackbar.make(binding.root, getString(R.string.copied_to_clipboard), Snackbar.LENGTH_SHORT).show()
             true
+        }
+
+        val publicFilesDir = requireContext().getPublicFilesDir().canonicalPath
+        val pipelineCacheDir = File("$publicFilesDir/graphics_pipeline_cache")
+        val vkPipelineCacheDir = File("$publicFilesDir/vk_graphics_pipeline_cache")
+
+        fun shaderCacheExists() : Boolean {
+            val titleId = item.titleId ?: return false
+            val hasFiles = pipelineCacheDir.listFiles { f -> f.name.startsWith(titleId) }?.isNotEmpty() == true
+            val hasVkDir = File(vkPipelineCacheDir, titleId).exists()
+            return hasFiles || hasVkDir
+        }
+
+        binding.deleteShaderCache.isEnabled = shaderCacheExists()
+        binding.deleteShaderCache.setOnClickListener {
+            AlertDialog.Builder(requireContext())
+                .setTitle(getString(R.string.delete_shader_cache_confirmation_message))
+                .setMessage(getString(R.string.action_irreversible))
+                .setNegativeButton(getString(R.string.no), null)
+                .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                    val titleId = item.titleId ?: return@setPositiveButton
+                    pipelineCacheDir.listFiles { f -> f.name.startsWith(titleId) }?.forEach { it.delete() }
+                    File(vkPipelineCacheDir, titleId).deleteRecursively()
+                    binding.deleteShaderCache.isEnabled = false
+                }.show()
         }
 
         dialog?.setOnKeyListener { _, keyCode, event ->
