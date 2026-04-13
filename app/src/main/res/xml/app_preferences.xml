@@ -24,6 +24,10 @@
         <org.stratoemu.strato.preference.FirmwareImportPreference
             app:key="firmware"
             app:title="@string/firmware" />
+        <org.stratoemu.strato.preference.BackupRestorePreference
+            app:key="backup_restore"
+            app:title="@string/backup_restore"
+            app:summary="@string/backup_restore_summary" />
     </PreferenceCategory>
     <PreferenceCategory
         android:key="category_appearance"

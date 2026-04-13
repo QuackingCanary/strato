@@ -313,4 +313,21 @@
     <string name="global_save_data_zip_name">Strato save data</string>
     <string name="game_crash">The game has crashed</string>
     <string name="game_crash_message">A fatal error occurred. Check the log for details.</string>
+    <!-- Backup & Restore -->
+    <string name="backup_restore">Backup &amp; Restore</string>
+    <string name="backup_restore_summary">Export or import all app data into a single file</string>
+    <string name="backup_restore_desc">Export a backup to share or store, or import a previously exported backup.</string>
+    <string name="backup_export">Export</string>
+    <string name="backup_import">Import</string>
+    <string name="backup_select_content">Select content to include</string>
+    <string name="backup_global_settings">Global settings</string>
+    <string name="backup_osc_settings">On-Screen Controls layout</string>
+    <string name="backup_input_bindings">Controller bindings</string>
+    <string name="backup_per_game_settings">Per-game configurations</string>
+    <string name="backup_game_saves">Game saves</string>
+    <string name="backup_gpu_drivers">GPU drivers</string>
+    <string name="backup_exported_ok">Backup saved successfully</string>
+    <string name="backup_restored_ok">Backup restored</string>
+    <string name="backup_restored_desc">Your backup has been restored successfully. The game list will be refreshed when you return to the home screen.</string>
+    <string name="backup_invalid_file">Invalid backup file: missing manifest</string>
 </resources>
