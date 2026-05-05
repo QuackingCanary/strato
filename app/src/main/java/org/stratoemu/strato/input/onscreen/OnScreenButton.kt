@@ -32,7 +32,8 @@ abstract class OnScreenButton(
     private val defaultRelativeWidth : Float,
     private val defaultRelativeHeight : Float,
     drawableId : Int,
-    private val defaultEnabled : Boolean
+    private val defaultEnabled : Boolean,
+    gameKey : String? = null
 ) : ConfigurableButton {
     companion object {
         /**
@@ -61,7 +62,7 @@ abstract class OnScreenButton(
         }
     }
 
-    final override val config : OnScreenConfiguration = OnScreenConfigurationImpl(onScreenControllerView.context, buttonId, defaultRelativeX, defaultRelativeY, defaultEnabled)
+    final override val config : OnScreenConfiguration = OnScreenConfigurationImpl(onScreenControllerView.context, buttonId, defaultRelativeX, defaultRelativeY, defaultEnabled, gameKey)
 
     protected val drawable = ContextCompat.getDrawable(onScreenControllerView.context, drawableId)!!
 
@@ -205,7 +206,7 @@ abstract class OnScreenButton(
         return !isPressed
     }
 
-    fun loadConfigValues() {
+    open fun loadConfigValues() {
         relativeX = config.relativeX
         relativeY = config.relativeY
     }

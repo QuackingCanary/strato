@@ -83,5 +83,28 @@ class GameSettingsFragment : PreferenceFragmentCompat() {
         @Suppress("SENSELESS_COMPARISON")
         if (BuildConfig.BUILD_TYPE == "release")
             findPreference<PreferenceCategory>("category_debug")?.isVisible = false
+
+        if ((activity as? SettingsActivity)?.isEmulationMode == true)
+            applyEmulationModeRestrictions()
+    }
+
+    private fun applyEmulationModeRestrictions() {
+        val whitelist = setOf("username_value", "is_internet_enabled", "force_max_gpu_clocks")
+        val gameCategoryKeysToShow = setOf("use_custom_settings", "reset_custom_settings", "copy_global_settings")
+
+        findPreference<PreferenceCategory>("category_game")?.apply {
+            val toRemove = mutableListOf<Preference>()
+            forEach { pref -> if (pref.key !in gameCategoryKeysToShow) toRemove.add(pref) }
+            toRemove.forEach { removePreference(it) }
+        }
+
+        listOf("category_system", "category_presentation", "category_gpu",
+            "category_hacks", "category_audio", "category_debug").forEach { key ->
+            val category = findPreference<PreferenceCategory>(key) ?: return@forEach
+            val toRemove = mutableListOf<Preference>()
+            category.forEach { pref -> if (pref.key !in whitelist) toRemove.add(pref) }
+            toRemove.forEach { category.removePreference(it) }
+            if (category.preferenceCount == 0) category.isVisible = false
+        }
     }
 }

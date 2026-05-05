@@ -21,4 +21,45 @@
     <style name="App.PreferenceFragment.Material" parent="PreferenceFragment.Material">
         <item name="android:divider">@drawable/preference_list_divider_m3</item>
     </style>
+
+    <style name="EmulationMenuDialogTheme" parent="AppTheme">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
+    </style>
+
+    <style name="EmulationMenuItem" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/selectableItemBackground</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:minHeight">56dp</item>
+        <item name="android:orientation">horizontal</item>
+        <item name="android:paddingHorizontal">16dp</item>
+        <item name="android:paddingVertical">12dp</item>
+    </style>
+
+    <style name="EmulationMenuItem.Icon" parent="">
+        <item name="android:layout_width">24dp</item>
+        <item name="android:layout_height">24dp</item>
+        <item name="android:contentDescription">@null</item>
+        <item name="tint">?attr/colorPrimary</item>
+    </style>
+
+    <style name="EmulationMenuItem.Icon.Destructive">
+        <item name="tint">?attr/colorError</item>
+    </style>
+
+    <style name="EmulationMenuItem.Text" parent="">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginStart">16dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.Material3.LabelLarge</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
+    </style>
+
+    <style name="EmulationMenuItem.Text.Destructive">
+        <item name="android:textColor">?attr/colorError</item>
+    </style>
 </resources>

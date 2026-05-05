@@ -11,8 +11,10 @@ import android.view.View
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceFragmentCompat
+import androidx.preference.PreferenceGroup
 import androidx.preference.SwitchPreferenceCompat
 import androidx.preference.TwoStatePreference
+import androidx.preference.forEach
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
 import org.stratoemu.strato.BuildConfig
@@ -77,6 +79,39 @@ class GlobalSettingsFragment : PreferenceFragmentCompat() {
             forceMaxGpuClocksPref.isSelectable = false
             forceMaxGpuClocksPref.isChecked = false
             forceMaxGpuClocksPref.summary = context!!.getString(R.string.force_max_gpu_clocks_desc_unsupported)
+        }
+
+        val settingsActivity = activity as? SettingsActivity
+        if (settingsActivity?.isInputOnlyMode == true)
+            applyInputOnlyModeRestrictions()
+        else if (settingsActivity?.isEmulationMode == true)
+            applyEmulationModeRestrictions()
+    }
+
+    private fun applyInputOnlyModeRestrictions() {
+        preferenceScreen.forEach { group ->
+            group.isVisible = group.key == "category_input"
+        }
+    }
+
+    private fun applyEmulationModeRestrictions() {
+        val whitelist = setOf(
+            "username_value",
+            "is_internet_enabled",
+            "force_max_gpu_clocks",
+            // TODO: add "report_faster_gpu_speeds" when preference is created
+            // TODO: add "disable_transfer_command_batching" when preference is created
+            // TODO: add "disable_render_pass_batching" when preference is created
+        )
+        preferenceScreen.forEach { group ->
+            if (group !is PreferenceCategory) return@forEach
+            var hasEnabled = false
+            group.forEach { pref ->
+                val enabled = pref.key in whitelist
+                pref.isEnabled = enabled
+                if (enabled) hasEnabled = true
+            }
+            group.isVisible = hasEnabled
         }
     }
 }

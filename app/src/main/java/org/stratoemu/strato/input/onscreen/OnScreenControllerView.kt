@@ -78,6 +78,11 @@ class OnScreenControllerView @JvmOverloads constructor(context : Context, attrs 
             controls.buttons.forEach { it.hapticFeedback = hapticFeedback }
         }
 
+    fun reloadButtonConfig() {
+        controls.allButtons.forEach { it.loadConfigValues() }
+        invalidate()
+    }
+
     internal val editInfo = OnScreenEditInfo()
     fun setOnEditButtonChangedListener(listener : OnEditButtonChangedListener?) {
         editInfo.onEditButtonChangedListener = listener
@@ -94,7 +99,18 @@ class OnScreenControllerView @JvmOverloads constructor(context : Context, attrs 
     private val effectClick = VibrationEffect.createPredefined(VibrationEffect.EFFECT_TICK)
 
     // Ensure controls init happens after editInfo is initialized so that the buttons have a valid reference to it
-    private val controls = Controls(this)
+    private var controls = Controls(this)
+
+    fun setGameKey(key : String?) {
+        joystickAnimators.values.forEach { it?.cancel() }
+        joystickAnimators.clear()
+        controls = Controls(this, key)
+        controls.setStickRegions(stickRegions)
+        controls.joysticks.forEach { it.recenterSticks = recenterSticks }
+        controls.buttons.forEach { it.hapticFeedback = hapticFeedback }
+        if (editInfo.isEditing) selectAllButtons()
+        invalidate()
+    }
 
     override fun onDraw(canvas : Canvas) {
         super.onDraw(canvas)

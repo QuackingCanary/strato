@@ -45,6 +45,7 @@
             android:exported="true"
             android:label="@string/settings"
             android:launchMode="singleTop"
+            android:screenOrientation="behind"
             android:parentActivityName=".MainActivity">
         </activity>
 

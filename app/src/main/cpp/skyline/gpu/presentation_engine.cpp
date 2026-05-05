@@ -351,6 +351,10 @@ namespace skyline::gpu {
         if (!env->IsSameObject(newSurface, nullptr))
             jSurface = env->NewGlobalRef(newSurface);
 
+        if (vkSwapchain)
+            for (auto &fence : frameFences)
+                if (fence)
+                    fence->Wait();
         vkSwapchain.reset();
 
         if (jSurface) {

@@ -62,8 +62,9 @@ interface OnScreenConfiguration {
     var activationRadius : Float
 }
 
-class OnScreenConfigurationImpl(private val context : Context, private val buttonId : ButtonId, defaultRelativeX : Float, defaultRelativeY : Float, defaultEnabled : Boolean) : OnScreenConfiguration {
-    private inline fun <reified T> config(default : T, prefix : String = "${buttonId.name}_") = sharedPreferences(context, default, prefix, "controller_config")
+class OnScreenConfigurationImpl(private val context : Context, private val buttonId : ButtonId, defaultRelativeX : Float, defaultRelativeY : Float, defaultEnabled : Boolean, gameKey : String? = null) : OnScreenConfiguration {
+    private val prefsName = if (gameKey != null) "controller_config_$gameKey" else "controller_config"
+    private inline fun <reified T> config(default : T, prefix : String = "${buttonId.name}_") = sharedPreferences(context, default, prefix, prefsName)
 
     override var enabled by config(defaultEnabled)
     override var toggleMode by config(OnScreenConfiguration.DefaultToggleMode)

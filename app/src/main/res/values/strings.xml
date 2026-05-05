@@ -300,6 +300,15 @@
     <string name="expand_button_title" tools:override="true">Expand</string>
     <string name="undo">Undo</string>
     <string name="per_game_settings_active_message">Per-game settings are active</string>
+    <!-- Emulation menu -->
+    <string name="resume">Resume</string>
+    <string name="emulation_menu">Menu</string>
+    <string name="toggle_controller">Controller</string>
+    <string name="controller_scope_title">Apply to</string>
+    <string name="controller_scope_global">Global</string>
+    <string name="controller_scope_per_game">This game (%1$s)</string>
+    <string name="game_settings">Game Settings</string>
+    <string name="quit_game">Quit Game</string>
     <string name="save_data_manager">Manage save data</string>
     <string name="save_data_found">Save data found. What would you like to do?</string>
     <string name="save_data_not_found">No save data found. What would you like to do?</string>

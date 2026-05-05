@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.stratoemu.strato.EmulationMenuPanelLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/menu_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal">
+
+    <LinearLayout
+        android:id="@+id/menu_panel"
+        android:layout_width="@dimen/emulation_menu_width"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:id="@+id/menu_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="12dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/emulation_menu"
+                android:textAppearance="@style/TextAppearance.Material3.LabelSmall"
+                android:textColor="?attr/colorOnSurfaceVariant"
+                android:letterSpacing="0.1" />
+
+            <TextView
+                android:id="@+id/menu_game_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:textAppearance="@style/TextAppearance.Material3.TitleMedium" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant" />
+
+        <LinearLayout
+            android:id="@+id/menu_item_pause"
+            style="@style/EmulationMenuItem">
+
+            <ImageView
+                android:id="@+id/menu_pause_icon"
+                style="@style/EmulationMenuItem.Icon"
+                android:src="@drawable/ic_pause" />
+
+            <TextView
+                android:id="@+id/menu_pause_text"
+                style="@style/EmulationMenuItem.Text"
+                android:text="@string/pause" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_item_controller"
+            style="@style/EmulationMenuItem">
+
+            <ImageView
+                style="@style/EmulationMenuItem.Icon"
+                android:src="@drawable/ic_controller" />
+
+            <TextView
+                style="@style/EmulationMenuItem.Text"
+                android:text="@string/controller" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_item_settings"
+            style="@style/EmulationMenuItem">
+
+            <ImageView
+                style="@style/EmulationMenuItem.Icon"
+                android:src="@drawable/ic_settings" />
+
+            <TextView
+                style="@style/EmulationMenuItem.Text"
+                android:text="@string/settings" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/menu_item_game_settings"
+            style="@style/EmulationMenuItem">
+
+            <ImageView
+                style="@style/EmulationMenuItem.Icon"
+                android:src="@drawable/ic_settings" />
+
+            <TextView
+                style="@style/EmulationMenuItem.Text"
+                android:text="@string/game_settings" />
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="?attr/colorOutlineVariant" />
+
+        <LinearLayout
+            android:id="@+id/menu_item_quit"
+            style="@style/EmulationMenuItem">
+
+            <ImageView
+                style="@style/EmulationMenuItem.Icon.Destructive"
+                android:src="@drawable/ic_close" />
+
+            <TextView
+                style="@style/EmulationMenuItem.Text.Destructive"
+                android:text="@string/quit_game" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+</org.stratoemu.strato.EmulationMenuPanelLayout>

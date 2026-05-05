@@ -30,6 +30,10 @@ import kotlin.math.roundToInt
 
 @AndroidEntryPoint
 class OnScreenEditActivity : AppCompatActivity() {
+    companion object {
+        const val GAME_KEY_ARG = "game_key"
+    }
+
     private val binding by lazy { OnScreenEditActivityBinding.inflate(layoutInflater) }
 
     @Inject
@@ -101,6 +105,7 @@ class OnScreenEditActivity : AppCompatActivity() {
 
         binding.onScreenControllerView.recenterSticks = appSettings.onScreenControlRecenterSticks
         binding.onScreenControllerView.stickRegions = appSettings.onScreenControlUseStickRegions
+        intent.getStringExtra(GAME_KEY_ARG)?.let { binding.onScreenControllerView.setGameKey(it) }
 
         val snapToGrid = appSettings.onScreenControlSnapToGrid
         binding.onScreenControllerView.setSnapToGrid(snapToGrid)

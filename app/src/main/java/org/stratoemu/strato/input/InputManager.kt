@@ -23,6 +23,8 @@ class InputManager @Inject constructor(@ApplicationContext context : Context) {
      */
     private val file = File("${context.applicationInfo.dataDir}/input.bin")
 
+    private var activeFile : File = file
+
     /**
      * A [HashMap] of all the controllers that contains their metadata
      */
@@ -99,11 +101,43 @@ class InputManager @Inject constructor(@ApplicationContext context : Context) {
             }
         }
 
-        ObjectOutputStream(FileOutputStream(file)).use {
+        ObjectOutputStream(FileOutputStream(activeFile)).use {
             it.writeObject(controllers)
             it.writeObject(eventMap)
 
             it.flush()
         }
     }
+
+    fun activatePerGameMode(gameKey : String) {
+        val perGameFile = File(file.parent, "input_$gameKey.bin")
+        if (!perGameFile.exists() && file.exists())
+            file.copyTo(perGameFile, overwrite = false)
+        activeFile = perGameFile
+        try {
+            ObjectInputStream(FileInputStream(activeFile)).use {
+                @Suppress("UNCHECKED_CAST")
+                controllers = it.readObject() as HashMap<Int, Controller>
+                @Suppress("UNCHECKED_CAST")
+                eventMap = it.readObject() as HashMap<HostEvent?, GuestEvent?>
+            }
+        } catch (e : Exception) {
+            Log.e(this.toString(), e.localizedMessage ?: "Cannot load per-game input file")
+            // Keep activeFile = perGameFile so that syncFile() never writes per-game data
+            // to the global input.bin. Fall back to global in-memory state instead.
+            try { syncObjects() } catch (ignored : Exception) { }
+        }
+    }
+
+    fun deactivatePerGameMode() {
+        if (activeFile == file) return
+        activeFile = file
+        try {
+            syncObjects()
+        } catch (e : Exception) {
+            Log.e(this.toString(), e.localizedMessage ?: "Cannot reload global input file")
+        }
+    }
+
+    fun hasPerGameConfig(gameKey : String) = File(file.parent, "input_$gameKey.bin").exists()
 }

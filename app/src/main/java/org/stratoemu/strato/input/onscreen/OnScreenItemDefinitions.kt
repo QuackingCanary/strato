@@ -34,7 +34,8 @@ open class CircularButton(
     defaultRelativeY : Float,
     defaultRelativeRadiusToX : Float,
     drawableId : Int = R.drawable.ic_button,
-    defaultEnabled : Boolean = true
+    defaultEnabled : Boolean = true,
+    gameKey : String? = null
 ) : OnScreenButton(
     onScreenControllerView,
     buttonId,
@@ -43,7 +44,8 @@ open class CircularButton(
     defaultRelativeRadiusToX * 2f,
     defaultRelativeRadiusToX * CONFIGURED_ASPECT_RATIO * 2f,
     drawableId,
-    defaultEnabled
+    defaultEnabled,
+    gameKey
 ) {
     val radius get() = itemWidth / 2f
 
@@ -58,16 +60,18 @@ open class JoystickButton(
     val stickId : StickId,
     defaultRelativeX : Float,
     defaultRelativeY : Float,
-    defaultRelativeRadiusToX : Float
+    defaultRelativeRadiusToX : Float,
+    gameKey : String? = null
 ) : CircularButton(
     onScreenControllerView,
     stickId.button,
     defaultRelativeX,
     defaultRelativeY,
     defaultRelativeRadiusToX,
-    R.drawable.ic_button
+    R.drawable.ic_button,
+    gameKey = gameKey
 ) {
-    private val innerButton = CircularButton(onScreenControllerView, buttonId, config.relativeX, config.relativeY, defaultRelativeRadiusToX * 0.75f, R.drawable.ic_stick)
+    private val innerButton = CircularButton(onScreenControllerView, buttonId, config.relativeX, config.relativeY, defaultRelativeRadiusToX * 0.75f, R.drawable.ic_stick, gameKey = gameKey)
 
     open var recenterSticks = false
         set(value) {
@@ -136,6 +140,12 @@ open class JoystickButton(
         return true
     }
 
+    override fun loadConfigValues() {
+        super.loadConfigValues()
+        innerButton.relativeX = relativeX
+        innerButton.relativeY = relativeY
+    }
+
     override fun onFingerUp(x : Float, y : Float) : Boolean {
         loadConfigValues()
         innerButton.relativeX = relativeX
@@ -196,13 +206,15 @@ class JoystickRegion(
     defaultRelativeY : Float,
     defaultRelativeRadiusToX : Float,
     private val relativeRegionPosition : RectF,
-    regionColor : Int
+    regionColor : Int,
+    gameKey : String? = null
 ) : JoystickButton(
     onScreenControllerView,
     stickId,
     defaultRelativeX,
     defaultRelativeY,
-    defaultRelativeRadiusToX
+    defaultRelativeRadiusToX,
+    gameKey
 ) {
     /**
      * A stick region always re-centers the stick, it always positions the stick at the initial touch position
@@ -276,7 +288,8 @@ open class RectangularButton(
     defaultRelativeWidth : Float,
     defaultRelativeHeight : Float,
     drawableId : Int = R.drawable.ic_rectangular_button,
-    defaultEnabled : Boolean = true
+    defaultEnabled : Boolean = true,
+    gameKey : String? = null
 ) : OnScreenButton(
     onScreenControllerView,
     buttonId,
@@ -285,7 +298,8 @@ open class RectangularButton(
     defaultRelativeWidth,
     defaultRelativeHeight,
     drawableId,
-    defaultEnabled
+    defaultEnabled,
+    gameKey
 ) {
     override fun isTouched(x : Float, y : Float) = currentBounds.contains(x.roundToInt(), y.roundToInt())
 }
@@ -296,7 +310,8 @@ class TriggerButton(
     defaultRelativeX : Float,
     defaultRelativeY : Float,
     defaultRelativeWidth : Float,
-    defaultRelativeHeight : Float
+    defaultRelativeHeight : Float,
+    gameKey : String? = null
 ) : RectangularButton(
     onScreenControllerView,
     buttonId,
@@ -310,28 +325,29 @@ class TriggerButton(
         ZR -> R.drawable.ic_trigger_button_right
 
         else -> error("Unsupported trigger button")
-    }
+    },
+    gameKey = gameKey
 )
 
-class Controls(onScreenControllerView : OnScreenControllerView) {
-    private val buttonA = CircularButton(onScreenControllerView, A, 0.81f, 0.73f, 0.029f)
-    private val buttonB = CircularButton(onScreenControllerView, B, 0.76f, 0.85f, 0.029f)
-    private val buttonX = CircularButton(onScreenControllerView, X, 0.76f, 0.61f, 0.029f)
-    private val buttonY = CircularButton(onScreenControllerView, Y, 0.71f, 0.73f, 0.029f)
+class Controls(onScreenControllerView : OnScreenControllerView, gameKey : String? = null) {
+    private val buttonA = CircularButton(onScreenControllerView, A, 0.81f, 0.73f, 0.029f, gameKey = gameKey)
+    private val buttonB = CircularButton(onScreenControllerView, B, 0.76f, 0.85f, 0.029f, gameKey = gameKey)
+    private val buttonX = CircularButton(onScreenControllerView, X, 0.76f, 0.61f, 0.029f, gameKey = gameKey)
+    private val buttonY = CircularButton(onScreenControllerView, Y, 0.71f, 0.73f, 0.029f, gameKey = gameKey)
 
-    private val buttonDpadLeft = CircularButton(onScreenControllerView, DpadLeft, 0.06f, 0.53f, 0.029f)
-    private val buttonDpadUp = CircularButton(onScreenControllerView, DpadUp, 0.11f, 0.41f, 0.029f)
-    private val buttonDpadRight = CircularButton(onScreenControllerView, DpadRight, 0.16f, 0.53f, 0.029f)
-    private val buttonDpadDown = CircularButton(onScreenControllerView, DpadDown, 0.11f, 0.65f, 0.029f)
+    private val buttonDpadLeft = CircularButton(onScreenControllerView, DpadLeft, 0.06f, 0.53f, 0.029f, gameKey = gameKey)
+    private val buttonDpadUp = CircularButton(onScreenControllerView, DpadUp, 0.11f, 0.41f, 0.029f, gameKey = gameKey)
+    private val buttonDpadRight = CircularButton(onScreenControllerView, DpadRight, 0.16f, 0.53f, 0.029f, gameKey = gameKey)
+    private val buttonDpadDown = CircularButton(onScreenControllerView, DpadDown, 0.11f, 0.65f, 0.029f, gameKey = gameKey)
 
-    private val buttonL = RectangularButton(onScreenControllerView, L, 0.1f, 0.22f, 0.105f, 0.115f)
-    private val buttonR = RectangularButton(onScreenControllerView, R, 0.9f, 0.22f, 0.105f, 0.115f)
+    private val buttonL = RectangularButton(onScreenControllerView, L, 0.1f, 0.22f, 0.105f, 0.115f, gameKey = gameKey)
+    private val buttonR = RectangularButton(onScreenControllerView, R, 0.9f, 0.22f, 0.105f, 0.115f, gameKey = gameKey)
 
-    private val buttonZL = TriggerButton(onScreenControllerView, ZL, 0.1f, 0.08f, 0.105f, 0.115f)
-    private val buttonZR = TriggerButton(onScreenControllerView, ZR, 0.9f, 0.08f, 0.105f, 0.115f)
+    private val buttonZL = TriggerButton(onScreenControllerView, ZL, 0.1f, 0.08f, 0.105f, 0.115f, gameKey = gameKey)
+    private val buttonZR = TriggerButton(onScreenControllerView, ZR, 0.9f, 0.08f, 0.105f, 0.115f, gameKey = gameKey)
 
-    private val buttonL3 = CircularButton(onScreenControllerView, L3, 0.12f, 0.87f, 0.029f, defaultEnabled = false)
-    private val buttonR3 = CircularButton(onScreenControllerView, R3, 0.88f, 0.87f, 0.029f, defaultEnabled = false)
+    private val buttonL3 = CircularButton(onScreenControllerView, L3, 0.12f, 0.87f, 0.029f, defaultEnabled = false, gameKey = gameKey)
+    private val buttonR3 = CircularButton(onScreenControllerView, R3, 0.88f, 0.87f, 0.029f, defaultEnabled = false, gameKey = gameKey)
 
     private val circularButtonPairs = listOf(setOf(buttonA, buttonB, buttonX, buttonY), setOf(buttonDpadLeft, buttonDpadUp, buttonDpadRight, buttonDpadDown))
 
@@ -342,25 +358,25 @@ class Controls(onScreenControllerView : OnScreenControllerView) {
     val buttonPairs = circularButtonPairs + triggerButtonPairs
 
     val circularButtons = circularButtonPairs.flatten() + stickButtons + listOf(
-        CircularButton(onScreenControllerView, Plus, 0.57f, 0.85f, 0.029f),
-        CircularButton(onScreenControllerView, Minus, 0.43f, 0.85f, 0.029f),
-        CircularButton(onScreenControllerView, Menu, 0.5f, 0.85f, 0.029f)
+        CircularButton(onScreenControllerView, Plus, 0.57f, 0.85f, 0.029f, gameKey = gameKey),
+        CircularButton(onScreenControllerView, Minus, 0.43f, 0.85f, 0.029f, gameKey = gameKey),
+        CircularButton(onScreenControllerView, Menu, 0.5f, 0.85f, 0.029f, gameKey = gameKey)
     )
 
     private val joystickRegions = listOf<JoystickButton>(
         JoystickRegion(
             onScreenControllerView, Left, 0.24f, 0.75f, 0.06f,
-            RectF(0f, 0f, 0.5f, 1f), SwitchColors.NEON_BLUE.color
+            RectF(0f, 0f, 0.5f, 1f), SwitchColors.NEON_BLUE.color, gameKey = gameKey
         ),
         JoystickRegion(
             onScreenControllerView, Right, 0.9f, 0.53f, 0.06f,
-            RectF(0.5f, 0f, 1f, 1f), SwitchColors.NEON_RED.color
+            RectF(0.5f, 0f, 1f, 1f), SwitchColors.NEON_RED.color, gameKey = gameKey
         ),
     )
 
     private val joystickButtons = listOf(
-        JoystickButton(onScreenControllerView, Left, 0.24f, 0.75f, 0.06f),
-        JoystickButton(onScreenControllerView, Right, 0.9f, 0.53f, 0.06f)
+        JoystickButton(onScreenControllerView, Left, 0.24f, 0.75f, 0.06f, gameKey = gameKey),
+        JoystickButton(onScreenControllerView, Right, 0.9f, 0.53f, 0.06f, gameKey = gameKey)
     )
 
     var joysticks = joystickButtons

@@ -38,12 +38,18 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class ControllerActivity : AppCompatActivity() {
+    companion object {
+        const val GAME_KEY_ARG = "game_key"
+    }
+
     private val binding by lazy { ControllerActivityBinding.inflate(layoutInflater) }
 
     /**
      * The index of the controller this activity manages
      */
     val id by lazy { intent.getIntExtra("index", 0) }
+
+    private val gameKey by lazy { intent.getStringExtra(GAME_KEY_ARG) }
 
     private val adapter = GenericAdapter()
 
@@ -105,7 +111,9 @@ class ControllerActivity : AppCompatActivity() {
                 })
 
                 items.add(ControllerViewItem(content = getString(R.string.osc_edit), onClick = {
-                    startActivity(Intent(this, OnScreenEditActivity::class.java))
+                    startActivity(Intent(this, OnScreenEditActivity::class.java).apply {
+                        gameKey?.let { putExtra(OnScreenEditActivity.GAME_KEY_ARG, it) }
+                    })
                 }))
             }
 
@@ -175,6 +183,8 @@ class ControllerActivity : AppCompatActivity() {
      */
     override fun onCreate(state : Bundle?) {
         super.onCreate(state)
+
+        gameKey?.let { inputManager.activatePerGameMode(it) }
 
         if (id < 0 || id > 7)
             throw IllegalArgumentException()
@@ -247,6 +257,11 @@ class ControllerActivity : AppCompatActivity() {
     override fun onPause() {
         inputManager.syncFile()
         super.onPause()
+    }
+
+    override fun onDestroy() {
+        inputManager.deactivatePerGameMode()
+        super.onDestroy()
     }
 
     private val onControllerTypeClick = { item : ControllerTypeViewItem, _ : Int ->

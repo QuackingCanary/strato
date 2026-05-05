@@ -119,7 +119,17 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
      */
     private var desiredRefreshRate = 60f
 
-    private var isEmulatorPaused = false
+    var isEmulatorPaused = false
+        private set
+
+    @Volatile private var pendingNativeSettingsUpdate = false
+    @Volatile private var pendingInputReload = false
+
+    private var edgeSwipeStartX = 0f
+    private var edgeSwipeStartY = 0f
+    private var isTrackingEdgeSwipe = false
+    private val edgeSwipeTouchSlop by lazy { ViewConfiguration.get(this).scaledTouchSlop }
+    private val edgeSwipeZone by lazy { 20.toPx }
 
     private lateinit var pictureInPictureParamsBuilder : PictureInPictureParams.Builder
 
@@ -284,8 +294,17 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
         requestedOrientation = emulationSettings.orientation
         window.attributes.layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
+        if (inputManager.hasPerGameConfig(gameInputKey()))
+            inputManager.activatePerGameMode(gameInputKey())
         inputHandler = InputHandler(inputManager, emulationSettings)
         setContentView(binding.root)
+
+        binding.root.addOnLayoutChangeListener { v, _, _, _, _, _, _, _, _ ->
+            v.systemGestureExclusionRects = if (resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                listOf(android.graphics.Rect(0, 0, edgeSwipeZone, v.height))
+            else
+                emptyList()
+        }
 
         builtinVibrator = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val vibratorManager = getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager
@@ -367,6 +386,9 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             hapticFeedback = appSettings.onScreenControl && appSettings.onScreenControlFeedback
             recenterSticks = appSettings.onScreenControlRecenterSticks
             stickRegions = appSettings.onScreenControlUseStickRegions
+            val gameKey = gameInputKey()
+            if (inputManager.hasPerGameConfig(gameKey))
+                setGameKey(gameKey)
         }
 
         binding.onScreenControllerToggle.apply {
@@ -392,10 +414,21 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         executeApplication(intent!!)
     }
 
-    @SuppressWarnings("WeakerAccess")
+    fun scheduleNativeSettingsUpdate() {
+        pendingNativeSettingsUpdate = true
+    }
+
+    fun scheduleInputReload() {
+        pendingInputReload = true
+    }
+
+    fun gameInputKey() : String = item.titleId?.takeIf { it.isNotBlank() }
+        ?: "${item.key()}_${item.uri.hashCode()}"
+
     fun pauseEmulator() {
         if (isEmulatorPaused) return
-        setSurface(null)
+        while (emulationThread?.isAlive == true && !setSurface(null))
+            Thread.yield()
         changeAudioStatus(false)
         isEmulatorPaused = true
     }
@@ -419,9 +452,12 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
     override fun onStart() {
         super.onStart()
 
-        onBackPressedDispatcher.addCallback(object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                returnFromEmulation()
+                if (supportFragmentManager.findFragmentByTag(EmulationMenuFragment.TAG) == null) {
+                    EmulationMenuFragment.newInstance(item.title)
+                        .show(supportFragmentManager, EmulationMenuFragment.TAG)
+                }
             }
         })
     }
@@ -432,6 +468,25 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         resumeEmulator()
 
         GpuDriverHelper.forceMaxGpuClocks(emulationSettings.forceMaxGpuClocks)
+
+        if (pendingNativeSettingsUpdate) {
+            pendingNativeSettingsUpdate = false
+            Thread { NativeSettings(this, emulationSettings).updateNative() }.start()
+        }
+
+        if (pendingInputReload) {
+            pendingInputReload = false
+            val gameKey = gameInputKey()
+            inputManager.activatePerGameMode(gameKey)
+            val type = inputHandler.getFirstControllerType()
+            binding.onScreenControllerView.controllerType = type
+            if (inputManager.hasPerGameConfig(gameKey))
+                binding.onScreenControllerView.setGameKey(gameKey)
+            else
+                binding.onScreenControllerView.reloadButtonConfig()
+            binding.onScreenControllerView.isGone = type == ControllerType.None || !appSettings.onScreenControl
+            binding.onScreenControllerToggle.isGone = binding.onScreenControllerView.isGone
+        }
 
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.R) {
             @Suppress("DEPRECATION")
@@ -566,6 +621,7 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             GpuDriverHelper.forceMaxGpuClocks(false)
 
         stopEmulation(false)
+        inputManager.deactivatePerGameMode()
         vibrators.forEach { (_, vibrator) -> vibrator.cancel() }
         vibrators.clear()
     }
@@ -615,11 +671,13 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
         // Note: We need FRAME_RATE_COMPATIBILITY_FIXED_SOURCE as there will be a degradation of user experience with FRAME_RATE_COMPATIBILITY_DEFAULT due to game speed alterations when the frame rate doesn't match the display refresh rate
             holder.surface.setFrameRate(desiredRefreshRate, if (emulationSettings.maxRefreshRate) Surface.FRAME_RATE_COMPATIBILITY_DEFAULT else Surface.FRAME_RATE_COMPATIBILITY_FIXED_SOURCE)
 
-        while (emulationThread!!.isAlive)
+        while (emulationThread?.isAlive == true) {
             if (setSurface(holder.surface)) {
                 gameSurface = holder.surface
                 return
             }
+            Thread.yield()
+        }
     }
 
     /**
@@ -634,11 +692,14 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
 
     override fun surfaceDestroyed(holder : SurfaceHolder) {
         Log.d(Tag, "surfaceDestroyed Holder: $holder")
-        while (emulationThread!!.isAlive)
+        while (emulationThread?.isAlive == true) {
             if (setSurface(null)) {
                 gameSurface = null
                 return
             }
+            Thread.yield()
+        }
+        gameSurface = null
     }
 
     private fun isControllerConnected() : Boolean {
@@ -654,6 +715,40 @@ class EmulationActivity : AppCompatActivity(), SurfaceHolder.Callback, View.OnTo
             }
         }
         return false
+    }
+
+    override fun dispatchTouchEvent(ev : MotionEvent) : Boolean {
+        if (resources.configuration.orientation == android.content.res.Configuration.ORIENTATION_LANDSCAPE) {
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    isTrackingEdgeSwipe = ev.x <= edgeSwipeZone
+                    if (isTrackingEdgeSwipe) {
+                        edgeSwipeStartX = ev.x
+                        edgeSwipeStartY = ev.y
+                    }
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (isTrackingEdgeSwipe) {
+                        val dx = ev.x - edgeSwipeStartX
+                        val dy = ev.y - edgeSwipeStartY
+                        if (dx > edgeSwipeTouchSlop && abs(dx) > abs(dy)) {
+                            isTrackingEdgeSwipe = false
+                            if (supportFragmentManager.findFragmentByTag(EmulationMenuFragment.TAG) == null) {
+                                val cancel = MotionEvent.obtain(ev).also { it.action = MotionEvent.ACTION_CANCEL }
+                                super.dispatchTouchEvent(cancel)
+                                cancel.recycle()
+                                binding.root.performHapticFeedback(HapticFeedbackConstants.GESTURE_START)
+                                EmulationMenuFragment.newInstance(item.title)
+                                    .show(supportFragmentManager, EmulationMenuFragment.TAG)
+                                return true
+                            }
+                        }
+                    }
+                }
+                MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> isTrackingEdgeSwipe = false
+            }
+        }
+        return super.dispatchTouchEvent(ev)
     }
 
     override fun dispatchKeyEvent(event : KeyEvent) : Boolean {

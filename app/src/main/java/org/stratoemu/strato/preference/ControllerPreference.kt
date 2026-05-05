@@ -16,6 +16,7 @@ import androidx.preference.R as AndroidR
 import org.stratoemu.strato.di.getInputManager
 import org.stratoemu.strato.input.ControllerActivity
 import org.stratoemu.strato.R
+import org.stratoemu.strato.settings.SettingsActivity
 
 /**
  * This preference is used to launch [ControllerActivity] using a preference
@@ -60,5 +61,9 @@ class ControllerPreference @JvmOverloads constructor(context : Context, attrs : 
     /**
      * This launches [ControllerActivity] on click to configure the controller
      */
-    override fun onClick() = controllerCallback.launch(Intent(context, ControllerActivity::class.java).putExtra(INDEX_ARG, index))
+    override fun onClick() {
+        val intent = Intent(context, ControllerActivity::class.java).putExtra(INDEX_ARG, index)
+        (context as? SettingsActivity)?.gameKey?.let { intent.putExtra(ControllerActivity.GAME_KEY_ARG, it) }
+        controllerCallback.launch(intent)
+    }
 }

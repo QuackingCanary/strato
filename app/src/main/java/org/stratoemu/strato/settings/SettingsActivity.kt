@@ -37,6 +37,16 @@ import org.stratoemu.strato.utils.WindowInsetsHelper
 private const val PREFERENCE_DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG"
 
 class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPreferenceDisplayDialogCallback {
+
+    companion object {
+        const val EXTRA_EMULATION_MODE = "emulation_mode"
+        const val EXTRA_INPUT_ONLY_MODE = "input_only_mode"
+        const val EXTRA_GAME_KEY = "game_key"
+    }
+
+    val isEmulationMode get() = intent.getBooleanExtra(EXTRA_EMULATION_MODE, false)
+    val isInputOnlyMode get() = intent.getBooleanExtra(EXTRA_INPUT_ONLY_MODE, false)
+    val gameKey : String? get() = intent.getStringExtra(EXTRA_GAME_KEY)
     val binding by lazy { SettingsActivityBinding.inflate(layoutInflater) }
     val hiddenCategoriesFromSearch = if (BuildConfig.BUILD_TYPE == "release") {
         arrayOf("category_debug", "category_credits", "category_licenses")
@@ -127,6 +137,10 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
 
     override fun onCreateOptionsMenu(menu : Menu?) : Boolean {
         menuInflater.inflate(R.menu.settings_menu, menu)
+        if (isEmulationMode || isInputOnlyMode) {
+            menu?.findItem(R.id.app_bar_search)?.isVisible = false
+            return super.onCreateOptionsMenu(menu)
+        }
         val menuItem = menu!!.findItem(R.id.app_bar_search)
         val searchView = menuItem.actionView as SearchView
         searchView.queryHint = getString(R.string.search)
@@ -187,6 +201,11 @@ class SettingsActivity : AppCompatActivity(), PreferenceFragmentCompat.OnPrefere
         }
 
         return super.onKeyUp(keyCode, event)
+    }
+
+    override fun onSupportNavigateUp() : Boolean {
+        onBackPressedDispatcher.onBackPressed()
+        return true
     }
 
     override fun finish() {
