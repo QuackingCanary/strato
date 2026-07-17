@@ -30,19 +30,36 @@ namespace skyline::service::nvdrv::device::nvhost {
         if (fenceThresholds.size() > syncpointIncrs.size())
             return PosixResult::InvalidArgument;
 
-        if (!relocs.empty())
-            throw exception("Relocations are unimplemented!");
+        if (relocs.size() != relocShifts.size())
+            return PosixResult::InvalidArgument;
 
         std::scoped_lock lock(channelMutex);
+
+        // NVDEC and VIC are fully implemented, other host1x engines aren't so their syncpoint increments need to be handled on the CPU
+        const bool emulatedChannel{channelType == core::ChannelType::NvDec || channelType == core::ChannelType::VIC};
+
+        // Apply any relocations to the command buffers before they are submitted, these are used to patch in the IOVAs of pinned handles
+        for (size_t i{}; i < relocs.size(); i++) {
+            const auto &reloc{relocs[i]};
+
+            auto patchHandleDesc{core.nvMap.GetHandle(reloc.patchMem)};
+            if (!patchHandleDesc)
+                throw exception("Invalid handle passed for a relocation!");
+
+            u32 pinAddress{core.nvMap.PinHandle(reloc.pinMem)};
+            auto patchAddress{reinterpret_cast<u32 *>(patchHandleDesc->address + reloc.patchOffset)};
+            *patchAddress = (pinAddress + reloc.pinOffset) >> relocShifts[i];
+        }
 
         for (size_t i{}; i < syncpointIncrs.size(); i++) {
             const auto &incr{syncpointIncrs[i]};
 
             u32 max{core.syncpointManager.IncrementSyncpointMaxExt(incr.syncpointId, incr.numIncrs)};
 
-            // Increment syncpoints on the CPU to avoid needing to pass through the emulated nvdec code which currently does nothing
-            for (size_t j{}; j < incr.numIncrs; j++)
-                state.soc->host1x.syncpoints[incr.syncpointId].Increment();
+            // Increment syncpoints on the CPU for engines that aren't emulated, the emulated ones increment them through INCR_SYNCPT methods in the pushbuffer
+            if (!emulatedChannel)
+                for (size_t j{}; j < incr.numIncrs; j++)
+                    state.soc->host1x.syncpoints[incr.syncpointId].Increment();
 
             if (i < fenceThresholds.size())
                 fenceThresholds[i] = max;
@@ -57,8 +74,8 @@ namespace skyline::service::nvdrv::device::nvhost {
             LOGD("Submit gather, CPU address: 0x{:X}, words: 0x{:X}", gatherAddress, cmdBuf.words);
 
             span gather(reinterpret_cast<u32 *>(gatherAddress), cmdBuf.words);
-            // Skip submitting the cmdbufs as no functionality is implemented
-            // state.soc->host1x.channels[static_cast<size_t>(channelType)].Push(gather);
+            if (emulatedChannel)
+                state.soc->host1x.channels[static_cast<size_t>(channelType)].Push(gather);
         }
 
         return PosixResult::Success;

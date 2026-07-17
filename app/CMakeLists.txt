@@ -98,6 +98,9 @@ add_subdirectory("libraries/robin-map")
 # Renderdoc in-app API
 include_directories("libraries/renderdoc")
 
+# FFmpeg (for NVDEC video decoding)
+add_subdirectory("libraries/ffmpeg-cmake")
+
 # Thread Pool
 include_directories("libraries/thread-pool")
 
@@ -207,6 +210,10 @@ add_library(skyline SHARED
         ${source_DIR}/skyline/soc/host1x/classes/host1x.cpp
         ${source_DIR}/skyline/soc/host1x/classes/vic.cpp
         ${source_DIR}/skyline/soc/host1x/classes/nvdec.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/nvdec/decoder.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/nvdec/codec.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/nvdec/h264.cpp
+        ${source_DIR}/skyline/soc/host1x/classes/nvdec/vp9.cpp
         ${source_DIR}/skyline/soc/gm20b/channel.cpp
         ${source_DIR}/skyline/soc/gm20b/gpfifo.cpp
         ${source_DIR}/skyline/soc/gm20b/gmmu.cpp
@@ -398,4 +405,4 @@ target_include_directories(skyline PRIVATE ${source_DIR}/skyline)
 target_compile_options(skyline PRIVATE -Wall -Wno-unknown-attributes -Wno-c++20-extensions -Wno-c++17-extensions -Wno-c99-designator -Wno-reorder -Wno-missing-braces -Wno-unused-variable -Wno-unused-private-field -Wno-dangling-else -Wconversion -fsigned-bitfields)
 
 target_link_libraries(skyline PRIVATE shader_recompiler audio_core)
-target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map)
+target_link_libraries_system(skyline android perfetto fmt lz4_static tzcode vkma mbedcrypto opus Boost::intrusive Boost::container Boost::preprocessor Boost::regex range-v3 adrenotools tsl::robin_map ffmpeg-avcodec ffmpeg-swscale ffmpeg-avutil)

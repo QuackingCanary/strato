@@ -46,7 +46,7 @@ namespace skyline::soc::host1x {
         void Run();
 
       public:
-        ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints);
+        ChannelCommandFifo(const DeviceState &state, SyncpointSet &syncpoints, NvDecDevice &nvDec, VicDevice &vic);
 
         ~ChannelCommandFifo();
 

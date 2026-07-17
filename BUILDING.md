@@ -89,6 +89,14 @@ Finally, sync the project:
 <p><img height="75" src="https://user-images.githubusercontent.com/37104290/162199780-b5406b5d-480d-4371-9dc4-5cfc6d655746.png"></p>
 
 
+## FFmpeg (NVDEC video decoding)
+
+NVDEC emulation depends on a minimal static build of FFmpeg (`libavcodec`, `libswscale`, `libavutil`), built automatically by CMake from the `app/libraries/ffmpeg` submodule using the NDK toolchain. If you cloned before the submodule was added, fetch it with:
+```cmd
+git submodule update --init app/libraries/ffmpeg
+```
+The FFmpeg `configure` script requires a POSIX shell and `make`, so on Windows the build must run under MSYS2/WSL or use a prebuilt FFmpeg (adjust the imported library paths in `app/libraries/ffmpeg-cmake/CMakeLists.txt`).
+
 ## Common issues (and how to fix them)
 
 * `Cmake Error: CMake was unable to find a build program corresponding to "Ninja"`

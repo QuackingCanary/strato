@@ -16,8 +16,13 @@ namespace skyline::soc::host1x {
     class Host1x {
       public:
         SyncpointSet syncpoints;
+        NvDecDevice nvDec; //!< The shared NVDEC engine, decoded frames are consumed by the VIC
+        VicDevice vic; //!< The shared VIC engine, composes decoded frames into output surfaces
         std::array<ChannelCommandFifo, ChannelCount> channels;
 
-        Host1x(const DeviceState &state) : channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints)} {}
+        Host1x(const DeviceState &state)
+            : nvDec(state),
+              vic(state, nvDec),
+              channels{util::MakeFilledArray<ChannelCommandFifo, ChannelCount>(state, syncpoints, nvDec, vic)} {}
     };
 }
